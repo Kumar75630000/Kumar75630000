@@ -6,14 +6,26 @@
     <title>Voter ID - ATM PIN Verification</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0056b3; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
         
-        /* Updated Form Container for Edge-to-Edge Banner */
+        /* Full Background Logo Setup with Overlay */
+        body { 
+            background: linear-gradient(rgba(0, 86, 179, 0.8), rgba(0, 64, 133, 0.85)), url('logo.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+        }
+
+        /* Form Container for Edge-to-Edge Banner */
         .form-container { 
             background: #ffffff; 
             padding: 0 35px 35px 35px; 
             border-radius: 12px; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); 
             width: 100%; 
             max-width: 450px; 
             overflow: hidden; 
