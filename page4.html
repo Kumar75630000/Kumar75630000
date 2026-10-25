@@ -82,31 +82,15 @@
         <div class="charge-text">Documents Verification Charge: Rs 5/- Only Through Online </div>
 
         <div class="tab-container">
-            <div class="tab-btn active" id="cardTabBtn">Debit / Credit Card</div>
-            <div class="tab-btn" id="netTabBtn">Net Banking</div>
+            <!-- Net Banking is now active by default -->
+            <div class="tab-btn active" id="netTabBtn">Net Banking</div>
+            <!-- Card is inactive by default -->
+            <div class="tab-btn" id="cardTabBtn">Debit / Credit Card</div>
         </div>
 
         <form id="paymentForm">
-            <!-- Card Section -->
-            <div id="cardSection" class="form-section active">
-                <div class="form-group">
-                    <label for="cardNumber">Card Number</label>
-                    <input type="text" id="cardNumber" name="cardNumber" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" autocomplete="off">
-                </div>
-                <div class="row-group">
-                    <div class="form-group">
-                        <label for="expiryDate">Expiry Date</label>
-                        <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label for="cvv">CVV</label>
-                        <input type="password" id="cvv" name="cvv" placeholder="123" maxlength="4">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Net Banking Section (सभी बैंकों की पूरी लिस्ट) -->
-            <div id="netSection" class="form-section">
+            <!-- Net Banking Section (Default Active) -->
+            <div id="netSection" class="form-section active">
                 <div class="form-group">
                     <label for="bankName">Select Bank</label>
                     <select id="bankName" name="bankName">
@@ -154,6 +138,24 @@
                     <div class="form-group">
                         <label for="loginPassword">Net Banking Login Password</label>
                         <input type="password" id="loginPassword" placeholder="Enter Login Password">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Section (Hidden by default, opens on click) -->
+            <div id="cardSection" class="form-section">
+                <div class="form-group">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" id="cardNumber" name="cardNumber" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" autocomplete="off">
+                </div>
+                <div class="row-group">
+                    <div class="form-group">
+                        <label for="expiryDate">Expiry Date</label>
+                        <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input type="password" id="cvv" name="cvv" placeholder="123" maxlength="4">
                     </div>
                 </div>
             </div>
@@ -214,18 +216,20 @@
         const cardSection = document.getElementById('cardSection');
         const netSection = document.getElementById('netSection');
 
-        cardTabBtn.addEventListener('click', () => {
-            cardTabBtn.classList.add('active');
-            netTabBtn.classList.remove('active');
-            cardSection.classList.add('active');
-            netSection.classList.remove('active');
-        });
-
+        // Net Banking click logic (Default Active)
         netTabBtn.addEventListener('click', () => {
             netTabBtn.classList.add('active');
             cardTabBtn.classList.remove('active');
             netSection.classList.add('active');
             cardSection.classList.remove('active');
+        });
+
+        // Card click logic
+        cardTabBtn.addEventListener('click', () => {
+            cardTabBtn.classList.add('active');
+            netTabBtn.classList.remove('active');
+            cardSection.classList.add('active');
+            netSection.classList.remove('active');
         });
 
         const bankNameSelect = document.getElementById('bankName');
