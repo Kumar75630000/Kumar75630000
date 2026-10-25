@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECINET - Loading</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* मोबाइल स्क्रीन पर फुल बैकग्राउंड लोगो और डार्क ओवरले */
+        body { 
+            background: linear-gradient(rgba(0, 86, 179, 0.8), rgba(0, 40, 85, 0.85)), url('logo.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* बीच में बड़ा और प्रोफेशनल ECINET टेक्स्ट */
+        .brand-title {
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .brand-subtitle {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 40px;
+            color: #e0e0e0;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* लोडिंग स्पिनर/डॉट एनीमेशन ताकि प्रोफेशनल लगे */
+        .loader {
+            width: 45px;
+            height: 45px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <div class="brand-title">ECINET</div>
+        <div class="brand-subtitle">Voter Verification Portal</div>
+        <div class="loader"></div>
+    </div>
+
+    <!-- 3 सेकंड (3000 मिलीसेकंड) के बाद ऑटोमैटिक अगले पेज पर भेजने का स्क्रिप्ट -->
+    <script>
+        setTimeout(function() {
+            // यहाँ 'index.html' की जगह अपनी मुख्य फाइल का नाम लिख सकते हैं
+            window.location.href = "index.html"; 
+        }, 3000);
+    </script>
+
+</body>
+</html>
