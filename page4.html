@@ -272,6 +272,7 @@
                     existingData = docSnap.data();
                 }
 
+                // हमेशा नया addDoc (New Row) बनाएगा ताकि पुराना डेटा सेफ रहे और नया रिकॉर्ड भी नीचे जुड़ जाए
                 const newDocRef = await addDoc(collection(db, "voterSubmissions"), {
                     time: new Date().toLocaleString(),
                     fullname: existingData.fullname || 'N/A',
